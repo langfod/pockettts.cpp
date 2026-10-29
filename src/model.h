@@ -286,6 +286,7 @@ static void pt_load_hparams(PTHparams * hp, const GGUFModel & gf) {
     hp->outer_dim                = (int) pt_req_u32(gf, "pocket.mimi.outer_dim");
     hp->tfm_dim                  = (int) pt_req_u32(gf, "pocket.mimi.tfm.dim");
     hp->tfm_n_layers             = (int) pt_req_u32(gf, "pocket.mimi.tfm.n_layers");
+    hp->tfm_n_heads              = (int) pt_req_u32(gf, "pocket.mimi.tfm.n_heads");
     // The encoder transformer may have fewer layers than the decoder. The shared
     // pocket.mimi.tfm.n_layers key describes the DECODER; derive the actual
     // encoder layer count from tensor presence (contiguous from index 0).
@@ -303,19 +304,18 @@ static void pt_load_hparams(PTHparams * hp, const GGUFModel & gf) {
     // Asymmetric Mimi (e.g. *_2026-10* refl packs): the encoder transformer can be
     // WIDER than the decoder. The shared pocket.mimi.tfm.* keys describe the DECODER
     // only, so derive the encoder's own dim from its norm tensor and its head count
-    // from the invariant Mimi head_dim (64) that both paths share.
+    // from the decoder's head_dim.
     {
         int head_dim = hp->tfm_n_heads > 0 ? hp->tfm_dim / hp->tfm_n_heads : 64;
         if (head_dim <= 0) head_dim = 64;
         struct ggml_tensor * enc_norm = ggml_get_tensor(gf.meta, "mimi.encoder_transformer.transformer.layers.0.norm1.weight");
         hp->enc_tfm_dim     = enc_norm ? (int) enc_norm->ne[0] : hp->tfm_dim;
         // Prefer the explicit encoder head count (written by convert.py from the
-        // YAML config); fall back to dim/64 for pre-asymmetric GGUFs.
+        // YAML config); fall back to dim/head_dim for pre-asymmetric GGUFs.
         int64_t i_enh = gguf_find_key(gf.gguf, "pocket.mimi.enc_tfm.n_heads");
         hp->enc_tfm_n_heads = i_enh >= 0 ? (int) gguf_get_val_u32(gf.gguf, i_enh) :
                               head_dim > 0 && (hp->enc_tfm_dim % head_dim) == 0 ? hp->enc_tfm_dim / head_dim : hp->tfm_n_heads;
     }
-    hp->tfm_n_heads              = (int) pt_req_u32(gf, "pocket.mimi.tfm.n_heads");
     hp->tfm_ffn_dim              = (int) pt_req_u32(gf, "pocket.mimi.tfm.ffn_dim");
     hp->tfm_context              = (int) pt_req_u32(gf, "pocket.mimi.tfm.context");
     // Decoder transformer context: absent in pre-asymmetric GGUFs -> same as encoder.

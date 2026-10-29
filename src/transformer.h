@@ -106,7 +106,8 @@ static PTQKV pt_qkv(ggml_context *   ctx,
 }
 
 // q [hd, T, n_heads], keys and values [kv_dim, S] (rows of all KV heads), mask [S, T].
-// GQA: num_kv_heads <= n_heads; query head i uses KV head (i % num_kv_heads).
+// GQA: num_kv_heads <= n_heads; query head i uses KV head i / (n_heads / num_kv_heads)
+// (consecutive groups share a KV head, matching Python's repeat_interleave).
 // Returns [attn_dim, T].
 
 // CUDA FA kernels exist only for these per-head dims (ggml-cuda/fattn.cu).
