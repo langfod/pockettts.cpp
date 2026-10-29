@@ -655,7 +655,7 @@ int pt_synthesize(struct pt_context * c, const struct pt_tts_params * p, struct 
         for (; step < max_gen; step++) {
             rng.normal(noise.data(), hp.ldim, stdv);
             float              eos = 0.0f;
-            const int hdim = c->w.z_proj ? (int) c->w.z_proj->ne[0] : hp.dim;
+            const int hdim = c->w.z_proj ? (int) c->w.z_proj->ne[1] : hp.dim;
             std::vector<float> hidden(dump0 && step == 0 ? hdim : 0);
             Timer              ts;
             if (!pt_step(c, latent.data(), noise.data(), p->lsd_steps, n_past, &eos, next.data(),

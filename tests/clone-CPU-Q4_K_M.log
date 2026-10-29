@@ -23,7 +23,7 @@
 [Load] Ready in 77 ms
 [WAV] Read buffer: 380672 samples, 22050 Hz, 1 ch, 16 bit
 [FlowLM] KV cache: 256 rows, 12.0 MB
-[Voice] 17.26 s of audio -> 217 prompt frames (encode 470 ms, prefill 43 ms)
+[Voice] 17.26 s of audio -> 217 prompt frames (encode 454 ms, prefill 44 ms)
 [Debug] voice-k0: [217, 1024] first4: -0.017018 0.002838 -0.001145 0.008442
 [Debug] voice-v-last: [217, 1024] first4: 0.089913 -0.032646 0.066173 0.069246
 [FlowLM] KV cache: 512 rows, 24.0 MB
@@ -31,9 +31,9 @@
 [Debug] text-embed: [43, 1024] first4: -0.009329 -0.000466 -0.002799 0.013528
 [Debug] step0-hidden: [1024] first4: 0.380415 -0.008563 0.515223 0.431115
 [Debug] step0-latent: [32] first4: -0.088552 -0.130379 0.109014 0.196474
-[TTS] chunk 1/2: 43 tokens, prefill 10.2 ms, 96 frames, EOS at 93
-[TTS] chunk 2/2: 8 tokens, prefill 4.0 ms, 15 frames, EOS at 12
-[TTS] 8.88 s of audio in 603 ms (14.7x real time), step 2.41 ms/frame, decode 2.81 ms/frame, seed 42
+[TTS] chunk 1/2: 43 tokens, prefill 10.1 ms, 96 frames, EOS at 93
+[TTS] chunk 2/2: 8 tokens, prefill 4.1 ms, 15 frames, EOS at 12
+[TTS] 8.88 s of audio in 595 ms (14.9x real time), step 2.19 ms/frame, decode 2.95 ms/frame, seed 42
 [Debug] eos: [113] first4: -10.216734 -8.563891 -8.380376 -8.490238
 [Debug] latents: [111, 32] first4: -0.088552 -0.130379 0.109014 0.196474
 [Debug] output-audio: [209280] first4: 0.000059 -0.000090 -0.000321 -0.000188

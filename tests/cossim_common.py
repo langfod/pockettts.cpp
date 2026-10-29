@@ -78,7 +78,11 @@ def install_hooks(model):
     norm = fl.out_norm.forward
     def out_norm(x):
         out = norm(x)
-        rec["hidden"].append(out[0, -1].detach().clone())
+        # Match C++ st.hidden: post z_proj when present.
+        if fl.z_proj is not None:
+            rec["hidden"].append(fl.z_proj(out)[0, -1].detach().clone())
+        else:
+            rec["hidden"].append(out[0, -1].detach().clone())
         return out
     fl.out_norm.forward = out_norm
 

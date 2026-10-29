@@ -20,7 +20,7 @@
 [WeightCtx] Loaded 213 tensors, 121.6 MB into backend
 [Load] ../models/pocket-tts-english_2026-10-Q8_0.gguf: flow 6 layers x 1024, head 6 x 512, 2 time conds, Mimi 24000 Hz / 12.5 Hz
 [Load] Flash attention: on, FP16 clamp: off
-[Load] Ready in 149 ms
+[Load] Ready in 147 ms
 [GGUF] ../models/pocket-tts-english_2026-10-voices.gguf: 54 tensors, data at offset 3200
 [Voice] alba: 127 prompt frames
 [Debug] voice-k0: [127, 1024] first4: -0.016474 0.004449 0.000103 0.007460
@@ -30,9 +30,9 @@
 [Debug] text-embed: [43, 1024] first4: -0.009534 -0.000615 -0.002768 0.013379
 [Debug] step0-hidden: [1024] first4: -0.185521 -0.645939 0.640145 0.153255
 [Debug] step0-latent: [32] first4: -0.451553 -0.178151 0.165678 0.130538
-[TTS] chunk 1/2: 43 tokens, prefill 240.1 ms, 90 frames, EOS at 87
-[TTS] chunk 2/2: 8 tokens, prefill 436.9 ms, 14 frames, EOS at 11
-[TTS] 8.32 s of audio in 3352 ms (2.5x real time), step 3.29 ms/frame, decode 22.35 ms/frame, seed 42
+[TTS] chunk 1/2: 43 tokens, prefill 11.3 ms, 90 frames, EOS at 87
+[TTS] chunk 2/2: 8 tokens, prefill 1.8 ms, 14 frames, EOS at 11
+[TTS] 8.32 s of audio in 172 ms (48.2x real time), step 0.95 ms/frame, decode 0.50 ms/frame, seed 42
 [Debug] eos: [106] first4: -10.800152 -9.116205 -10.444790 -10.644211
 [Debug] latents: [104, 32] first4: -0.451553 -0.178151 0.165678 0.130538
 [Debug] output-audio: [195840] first4: -0.000087 -0.000157 -0.000238 -0.000216

@@ -20,10 +20,10 @@
 [WeightCtx] Loaded 213 tensors, 121.6 MB into backend
 [Load] ../models/pocket-tts-english_2026-10-Q8_0.gguf: flow 6 layers x 1024, head 6 x 512, 2 time conds, Mimi 24000 Hz / 12.5 Hz
 [Load] Flash attention: on, FP16 clamp: off
-[Load] Ready in 150 ms
+[Load] Ready in 153 ms
 [WAV] Read buffer: 380672 samples, 22050 Hz, 1 ch, 16 bit
 [FlowLM] KV cache: 256 rows, 12.0 MB
-[Voice] 17.26 s of audio -> 217 prompt frames (encode 1601 ms, prefill 13 ms)
+[Voice] 17.26 s of audio -> 217 prompt frames (encode 240 ms, prefill 14 ms)
 [Debug] voice-k0: [217, 1024] first4: -0.016449 0.004101 0.000280 0.007442
 [Debug] voice-v-last: [217, 1024] first4: 0.093689 -0.036621 0.077454 0.071960
 [FlowLM] KV cache: 512 rows, 24.0 MB
@@ -31,9 +31,9 @@
 [Debug] text-embed: [43, 1024] first4: -0.009534 -0.000615 -0.002768 0.013379
 [Debug] step0-hidden: [1024] first4: 0.316611 -0.110445 0.551929 0.386405
 [Debug] step0-latent: [32] first4: -1.089075 -0.201505 -0.794975 -0.367549
-[TTS] chunk 1/2: 43 tokens, prefill 3.5 ms, 82 frames, EOS at 79
-[TTS] chunk 2/2: 8 tokens, prefill 1.9 ms, 16 frames, EOS at 13
-[TTS] 7.84 s of audio in 293 ms (26.8x real time), step 1.03 ms/frame, decode 1.80 ms/frame, seed 42
+[TTS] chunk 1/2: 43 tokens, prefill 4.1 ms, 82 frames, EOS at 79
+[TTS] chunk 2/2: 8 tokens, prefill 3.5 ms, 16 frames, EOS at 13
+[TTS] 7.84 s of audio in 165 ms (47.5x real time), step 1.06 ms/frame, decode 0.43 ms/frame, seed 42
 [Debug] eos: [100] first4: -10.204613 -9.644489 -10.170396 -9.740835
 [Debug] latents: [98, 32] first4: -1.089075 -0.201505 -0.794975 -0.367549
 [Debug] output-audio: [184320] first4: 0.014239 0.017158 0.018198 0.017640
