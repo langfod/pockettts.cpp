@@ -311,7 +311,7 @@ def convert_model(pack, pack_dir, out_path, config_dir=None, model_file=None,
     if rules is None:  # community packs may use an unseen language key
         rules = dict(remove_semicolons=False, replace={})
     dim = arch["dim"]
-    tfm_dim = t["mimi.decoder_transformer.transformer.layers.0.norm1.weight"].shape[0]
+    tfm_dim = t["mimi.decoder_transformer.tfm.layers.0.norm1.weight"].shape[0]
     n_dec = count(t, r"mimi\.decoder\.model\.(\d+)\.convtr\.weight")
     ratios = [t[f"mimi.decoder.model.{2 + 3 * i}.convtr.weight"].shape[2] // 2 for i in range(n_dec)]
 
@@ -353,13 +353,13 @@ def convert_model(pack, pack_dir, out_path, config_dir=None, model_file=None,
     dec_tr_cfg = mimi_cfg.get("decoder_transformer") or {}
     enc_tr_cfg = mimi_cfg.get("transformer") or {}
     tfm_n_heads = int(dec_tr_cfg["num_heads"]) if "num_heads" in dec_tr_cfg else tfm_dim // HEAD_DIM
-    enc_dim = t["mimi.encoder_transformer.transformer.layers.0.norm1.weight"].shape[0]
+    enc_dim = t["mimi.encoder_transformer.tfm.layers.0.norm1.weight"].shape[0]
     enc_n_heads = int(enc_tr_cfg["num_heads"]) if "num_heads" in enc_tr_cfg else (enc_dim // HEAD_DIM)
     w.add_uint32("pocket.mimi.tfm.dim", tfm_dim)
-    w.add_uint32("pocket.mimi.tfm.n_layers", count(t, r"mimi\.decoder_transformer\.transformer\.layers\.(\d+)\."))
+    w.add_uint32("pocket.mimi.tfm.n_layers", count(t, r"mimi\.decoder_transformer\.tfm\.layers\.(\d+)\."))
     w.add_uint32("pocket.mimi.tfm.n_heads", tfm_n_heads)
     w.add_uint32("pocket.mimi.enc_tfm.n_heads", enc_n_heads)
-    w.add_uint32("pocket.mimi.tfm.ffn_dim", t["mimi.decoder_transformer.transformer.layers.0.linear1.weight"].shape[0])
+    w.add_uint32("pocket.mimi.tfm.ffn_dim", t["mimi.decoder_transformer.tfm.layers.0.linear1.weight"].shape[0])
     w.add_uint32("pocket.mimi.tfm.context", MIMI_CONTEXT)
     # Decoder transformer context (asymmetric Mimi: decoder may use a smaller window).
     dec_ctx = int(dec_tr_cfg["context"]) if "context" in dec_tr_cfg else MIMI_CONTEXT
