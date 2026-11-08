@@ -148,6 +148,26 @@ def _dequant_linear(entries, base):
     return (q - zp).to(torch.float32) * scale
 
 
+GGML_MAX_NAME = 64  # ggml/gguf reject tensor names with len >= 64
+
+def shorten_names(t, pack):
+    """Rename the Mimi transformer tensors so every GGUF tensor name stays under
+    GGML_MAX_NAME. Checkpoints name them
+    'mimi.{enc,dec}oder_transformer.transformer.layers.N.self_attn.out_proj.weight'
+    (up to 72 chars); the GGUF uses '...tfm.layers.N.attn.out_proj.weight'.
+    flow_lm.* names already fit and are left untouched."""
+    out = {}
+    for k, v in t.items():
+        if k.startswith("mimi.") and "_transformer.transformer.layers." in k:
+            k = k.replace(".transformer.layers.", ".tfm.layers.", 1).replace(".self_attn.", ".attn.")
+        out[k] = v
+    too_long = sorted(k for k in out if len(k) >= GGML_MAX_NAME)
+    if too_long:
+        raise SystemExit(f"[Convert] FATAL {pack}: tensor name too long for GGUF "
+                         f"({len(too_long[0])} >= {GGML_MAX_NAME}): {too_long[0]}")
+    return out
+
+
 def count(tensors, pattern):
     return len({m.group(1) for k in tensors for m in [re.match(pattern, k)] if m})
 
@@ -300,6 +320,8 @@ def convert_model(pack, pack_dir, out_path, config_dir=None, model_file=None,
         print(f"[Convert] FATAL {pack}: zeroed Mimi encoder (voice cloning stripped mirror)")
         return 1
 
+    t = shorten_names(t, pack)
+
     cfg = config if config is not None else load_pack_config(pack, pack_dir, config_dir)
     arch = derive_arch(t, cfg, pack)
 
@@ -450,6 +472,8 @@ def main():
                              "otherwise configs are optional and tensor-derived.")
     parser.add_argument("--checkpoint-dir", default=CHECKPOINT_DIR,
                         help="Directory containing checkpoint packs (default: %(default)s)")
+    parser.add_argument("--skip-voices", action="store_true",
+                        help="Skip converting voice embeddings")
     args = parser.parse_args()
     config_dir      = args.config_dir
     checkpoint_dir  = args.checkpoint_dir
@@ -463,8 +487,10 @@ def main():
     root = os.path.join(checkpoint_dir, "languages")
     for pack in sorted(os.listdir(root)):
         pack_dir = os.path.join(root, pack)
-        model = os.path.join(OUTPUT_DIR, f"pocket-tts-{pack}-F32.gguf")
-        voices = os.path.join(OUTPUT_DIR, f"pocket-tts-{pack}-voices.gguf")
+        model_pack_dir = os.path.join(OUTPUT_DIR, pack)
+        os.makedirs(model_pack_dir, exist_ok=True)
+        model = os.path.join(model_pack_dir, f"{pack}-F32.gguf")
+        voices = os.path.join(model_pack_dir, f"{pack}-voices.gguf")
         if os.path.exists(model):
             print(f"[Convert] skip {os.path.basename(model)}: exists")
         else:
@@ -474,7 +500,8 @@ def main():
         if os.path.exists(voices):
             print(f"[Convert] skip {os.path.basename(voices)}: exists")
         else:
-            rc |= convert_voices(pack, pack_dir, voices)
+            if not args.skip_voices:
+                rc |= convert_voices(pack, pack_dir, voices)
     return rc
 
 

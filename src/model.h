@@ -293,7 +293,7 @@ static void pt_load_hparams(PTHparams * hp, const GGUFModel & gf) {
     {
         int enc_n = 0;
         for (int i = 0; i < hp->tfm_n_layers; i++) {
-            const std::string probe = "mimi.encoder_transformer.transformer.layers." + std::to_string(i) + ".norm1.weight";
+            const std::string probe = "mimi.encoder_transformer.tfm.layers." + std::to_string(i) + ".norm1.weight";
             if (gguf_find_tensor(gf.gguf, probe.c_str()) < 0) {
                 break;
             }
@@ -308,7 +308,7 @@ static void pt_load_hparams(PTHparams * hp, const GGUFModel & gf) {
     {
         int head_dim = hp->tfm_n_heads > 0 ? hp->tfm_dim / hp->tfm_n_heads : 64;
         if (head_dim <= 0) head_dim = 64;
-        struct ggml_tensor * enc_norm = ggml_get_tensor(gf.meta, "mimi.encoder_transformer.transformer.layers.0.norm1.weight");
+        struct ggml_tensor * enc_norm = ggml_get_tensor(gf.meta, "mimi.encoder_transformer.tfm.layers.0.norm1.weight");
         hp->enc_tfm_dim     = enc_norm ? (int) enc_norm->ne[0] : hp->tfm_dim;
         // Prefer the explicit encoder head count (written by convert.py from the
         // YAML config); fall back to dim/head_dim for pre-asymmetric GGUFs.
@@ -428,14 +428,15 @@ static Conv pt_load_convtr_layer(WeightCtx * wctx, const GGUFModel & gf, const s
     return c;
 }
 
-static TfmLayer pt_load_tfm_layer(WeightCtx * wctx, const GGUFModel & gf, const std::string & p, bool layer_scale) {
+static TfmLayer pt_load_tfm_layer(WeightCtx * wctx, const GGUFModel & gf, const std::string & p, bool layer_scale,
+                                  const char * attn = "self_attn") {
     TfmLayer l = {};
     l.norm1_w  = gf_load_tensor_f32(wctx, gf, p + ".norm1.weight");
     l.norm1_b  = gf_load_tensor_f32(wctx, gf, p + ".norm1.bias");
     l.norm2_w  = gf_load_tensor_f32(wctx, gf, p + ".norm2.weight");
     l.norm2_b  = gf_load_tensor_f32(wctx, gf, p + ".norm2.bias");
-    l.in_proj  = gf_load_tensor(wctx, gf, p + ".self_attn.in_proj.weight");
-    l.out_proj = gf_load_tensor(wctx, gf, p + ".self_attn.out_proj.weight");
+    l.in_proj  = gf_load_tensor(wctx, gf, p + "." + attn + ".in_proj.weight");
+    l.out_proj = gf_load_tensor(wctx, gf, p + "." + attn + ".out_proj.weight");
     l.linear1  = gf_load_tensor(wctx, gf, p + ".linear1.weight");
     l.linear2  = gf_load_tensor(wctx, gf, p + ".linear2.weight");
     if (layer_scale) {
@@ -537,7 +538,7 @@ static void pt_load_weights(PTWeights * w, const PTHparams & hp, const GGUFModel
     w->upsample_w = gf_load_tensor_f32(wc, gf, "mimi.upsample.convtr.convtr.weight");
     for (int i = 0; i < hp.tfm_n_layers; i++) {
         w->dec_layers.push_back(
-            pt_load_tfm_layer(wc, gf, "mimi.decoder_transformer.transformer.layers." + std::to_string(i), true));
+            pt_load_tfm_layer(wc, gf, "mimi.decoder_transformer.tfm.layers." + std::to_string(i), true, "attn"));
     }
     int idx   = 0;
     w->dec_in = pt_load_conv(wc, gf, "mimi.decoder.model." + std::to_string(idx++) + ".conv", 1, 1, true);
@@ -577,7 +578,7 @@ static void pt_load_weights(PTWeights * w, const PTHparams & hp, const GGUFModel
     w->enc_out = pt_load_conv(wc, gf, "mimi.encoder.model." + std::to_string(idx) + ".conv", 1, 1, true);
     for (int i = 0; i < hp.enc_tfm_n_layers; i++) {
         w->enc_layers.push_back(
-            pt_load_tfm_layer(wc, gf, "mimi.encoder_transformer.transformer.layers." + std::to_string(i), true));
+            pt_load_tfm_layer(wc, gf, "mimi.encoder_transformer.tfm.layers." + std::to_string(i), true, "attn"));
     }
     w->downsample = pt_load_conv(wc, gf, "mimi.downsample.conv.conv", hp.upsample_stride, 1, false);
 

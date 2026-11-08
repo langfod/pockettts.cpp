@@ -10,15 +10,28 @@ REM // Types: Q2_K Q3_K_S Q3_K_M Q3_K_L Q4_K_S Q4_K_M Q5_K_S Q5_K_M Q6_K Q8_0
 
 set Q=.\build\Release\quantize
 
-for %%f in ("models\pocket-tts-*-F32.gguf") do (
-        echo [Processing] %%f
-        if not exist "%%f" (
-            continue
-        )    
-        call :quantize "%%f" BF16
-        call :quantize "%%f" Q8_0
-        call :quantize "%%f" Q4_K_M
+set "SKIP_LIST=community"
+for /d %%D in ("models\*") do (
+  set "SKIP="
+  
+  :: Check if the current folder name matches any in the skip list
+  for %%S in (%SKIP_LIST%) do (
+    if /i "%%~nD"=="%%S" set "SKIP=1"
+  )
+  
+  :: Process the folder if it wasn't flagged to skip
+  if not defined SKIP (
+    for %%f in ("%%D\*-F32.gguf") do (
+      echo [Processing] %%f
+      if not exist "%%f" (
+        continue
+      )
+      call :quantize "%%f" BF16
+      call :quantize "%%f" Q8_0
+      call :quantize "%%f" Q4_K_M
     )
+  )
+)
 
 goto :eof
 
@@ -29,10 +42,10 @@ set type=%2
 call set out=%%src:-F32.gguf=-%type%.gguf%%
 
 if exist "%out%" (
-    echo [Skip] %out%
-) else (
-    echo [Quantize] %src% to %out% with type %type%
-    %Q% %src% %out% %type%
+  echo [Skip] %out%
+  ) else (
+  echo [Quantize] %src% to %out% with type %type%
+  %Q% %src% %out% %type%
 )
 
 :eof
